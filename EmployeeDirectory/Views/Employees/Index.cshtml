@@ -1,0 +1,119 @@
+﻿@model EmployeeDirectory.ViewModels.EmployeeIndexViewModel
+
+@{
+    ViewData["Title"] = "Employee Directory";
+}
+
+
+<!-- Modal Konfirmasi Hapus Modern -->
+<div class="modal fade" id="deleteConfirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="deleteModalLabel">⚠️ Konfirmasi Penghapusan</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-content-body p-4 text-center">
+                <i class="bi bi-exclamation-triangle-fill text-danger display-4 mb-3 d-block"></i>
+                <p class="fs-5 mb-1 fw-semibold text-dark">Apakah Anda yakin ingin menghapus?</p>
+                <p class="text-muted small">Data karyawan bernama <span id="deleteTargetName" class="fw-bold text-danger"></span> akan dihapus permanen dari database VPS.</p>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Batal</button>
+                <button type="button" id="btnConfirmDeleteAction" class="btn btn-danger px-4 fw-medium">Ya, Hapus Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-secondary">📁 Enterprise Employee Directory</h2>
+        <div class="col-md-4">
+            <!-- Search Box -->
+            <input type="text" id="searchInput" class="form-control shadow-sm" placeholder="Cari nama depan / belakang..." value="@Model.SearchTerm" />
+        </div>
+    </div>
+
+    <!-- Alert Container untuk Error/Success Notification (Bootstrap Toast) -->
+    <div id="alertContainer"></div>
+
+    <!-- Table Karyawan -->
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nama Lengkap</th>
+                    <th>Email</th>
+                    <th>Departemen</th>
+                    <th>Jabatan</th>
+                    <th>Tanggal Masuk</th>
+                    <th>Gaji</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="employeeTableBody">
+                @foreach (var emp in Model.Employees)
+                {
+                    <tr id="row-@emp.Id">
+                        <td class="fw-semibold">@emp.FullName</td>
+                        <td>@emp.Email</td>
+                        <td><span class="badge bg-secondary">@emp.Department</span></td>
+                        <td>@emp.JobTitle</td>
+                        <td>@emp.HireDate</td>
+                        <td class="text-success fw-bold">@emp.Salary</td>
+                        <td class="text-center">
+                            <button class="btn btn-outline-danger btn-sm btn-delete" data-id="@emp.Id">
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Employees.Any())
+                {
+                    <tr id="emptyStateRow">
+                        <td colspan="7" class="text-center text-muted py-4">Tidak ada data karyawan ditemukan.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted small">
+            Menampilkan <span id="txtTotalShowing" class="fw-bold">@Model.Employees.Count</span> dari <span id="txtTotalRecords" class="fw-bold">@Model.TotalRecords</span> data.
+        </div>
+        <nav>
+            <ul class="pagination mb-0" id="paginationControls">
+                <!-- Button Previous -->
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")" id="btnPrev">
+                    <button class="page-link shadow-none" data-page="@(Model.CurrentPage - 1)">Previous</button>
+                </li>
+                <!-- Indicator Halaman -->
+                <li class="page-item disabled">
+                    <span class="page-link text-dark bg-light fw-medium">
+                        Halaman <span id="txtCurrentPage">@Model.CurrentPage</span> dari <span id="txtTotalPages">@Model.TotalPages</span>
+                    </span>
+                </li>
+                <!-- Button Next -->
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")" id="btnNext">
+                    <button class="page-link shadow-none" data-page="@(Model.CurrentPage + 1)">Next</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Menjaga State Halaman dan Pencarian saat ini di Sisi Client (JavaScript Global Object) -->
+    <script>
+        window.AppState = {
+            currentPage: @Model.CurrentPage,
+            totalPages: @Model.TotalPages,
+            // PERBAIKAN: Menggunakan format bawaan Razor yang jauh lebih aman dan bersih
+            searchTerm: "@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.SearchTerm ?? ""))"
+        };
+    </script>
+    <script src="~/js/employee.js" defer></script>
+}
