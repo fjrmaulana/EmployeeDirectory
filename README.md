@@ -40,7 +40,7 @@ Follow these simple steps to host and run this project locally:
 1. **Clone the repository:**
    ```bash
    git clone https://github.com
-   cd Enterprise-Employee-Directory-EFCore
+   cd EmployeeDirectory
    ```
 
 2. **Configure Connection String:**
